@@ -74,6 +74,11 @@ public class Enemy : MonoBehaviour
             MoveUpdate();
             AttackRangeCheck();
         }
+        
+        else if (ES == EnemyState.Die)
+        {
+            anim.SetTrigger("Die");
+        }
     }
     
     void AttackRangeCheck()
@@ -84,6 +89,8 @@ public class Enemy : MonoBehaviour
             ES = EnemyState.Attack;
             anim.SetTrigger("Attack");
         }
+
+        ES = EnemyState.Idle;
     }
     
     
@@ -116,11 +123,10 @@ public class Enemy : MonoBehaviour
             {
                 Death();
             }
-        }
-        if (HP <= 0)
-        {
-            Speed = 0;
-            ES = EnemyState.Die;
+            else
+            {
+                ES = EnemyState.Idle;
+            }
         }
     }
     
@@ -129,6 +135,7 @@ public class Enemy : MonoBehaviour
         ES = EnemyState.Die;
         anim.SetTrigger("Die");
         Speed = 0;
+        PlayManager.instance.EnemyDie();
         
         //GUI 끄고 죽는 사운드 플레이
         EnemyUI.SetActive(false);
