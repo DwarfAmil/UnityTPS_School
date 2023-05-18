@@ -78,6 +78,7 @@ public class Enemy : MonoBehaviour
         else if (ES == EnemyState.Die)
         {
             anim.SetTrigger("Die");
+            gameObject.GetComponent<Collider>().isTrigger = true;
         }
     }
     

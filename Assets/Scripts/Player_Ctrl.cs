@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public enum PlayerState
@@ -35,11 +34,23 @@ public class Player_Ctrl : MonoBehaviour {
     public float Max_hp = 100;
     public float hp = 100;
 
+    public Text playerName;
+
+    private string _playerName;
 
     private float _timer = 0;
 
     void Start()
     {
+        _playerName = PlayerPrefs.GetString("CurrentPlayerName");
+        if (_playerName != "")
+        {
+            playerName.text = _playerName;
+        }
+        else
+        {
+            playerName.text = "NoName";
+        }
         animation = GetComponent<Animation>();
         ShotFX.SetActive(false);
     }
@@ -51,6 +62,10 @@ public class Player_Ctrl : MonoBehaviour {
         {
             KeyboardInput();
             LookUpdate();
+        }
+        else
+        {
+            PlayManager.instance.GameOver();
         }
         AnimationUpdate();
     }

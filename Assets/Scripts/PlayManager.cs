@@ -1,20 +1,24 @@
-using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayManager : MonoBehaviour
 {
     public static PlayManager instance;
-    
-    public bool PlayEnd;  //플레이가끝났는지 안 끝났는지 체크
-    public float Limit_Time = 60f;  //제한시간
-    public int Enemy_Count = 10;  //사냥해야될 몬스터 수
 
-    public TextMeshProUGUI TimeLabel;  //시간표기할 NGUI UItext
-    public TextMeshProUGUI EnemyLabel;  //남은몬스터 수 표기할 NGUI UItext
-    public GameObject FinalGUI;  //최종결과 UI들 묶어 놓은 오브젝트
-    public TextMeshProUGUI FinalMessage;  //최종결과 표기할 NGUI UItext
-    public TextMeshProUGUI FinalScoreLabel;  //최종점수 NGUI UItext
+    public bool PlayEnd; //플레이가끝났는지 안 끝났는지 체크
+    public float Limit_Time = 60f; //제한시간
+    public int Enemy_Count = 10; //사냥해야될 몬스터 수
+
+    public TextMeshProUGUI TimeLabel; //시간표기
+    public TextMeshProUGUI EnemyLabel; //남은몬스터 수 표기
+    public GameObject FinalGUI; //최종결과 UI들 묶어 놓은 오브젝트
+    public TextMeshProUGUI FinalMessage; //최종결과 표기
+    public TextMeshProUGUI FinalScoreLabel; //최종점수
+
+    [SerializeField] private GameObject _bestScoreUI;
+
+    [SerializeField] private GameObject _escPanel;
 
     private void Awake()
     {
@@ -22,6 +26,8 @@ public class PlayManager : MonoBehaviour
     }
 
     void Start(){
+        _bestScoreUI.SetActive(false);
+        _escPanel.SetActive(false);
         FinalGUI.SetActive(false);
         EnemyLabel.text = string.Format("Enemy : {0}", Enemy_Count);
         TimeLabel.text = string.Format("Time : {0:N2}", Limit_Time);
@@ -41,6 +47,12 @@ public class PlayManager : MonoBehaviour
                 GameOver();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Time.timeScale = 0;
+            _escPanel.SetActive(true);
+        }
     }
 
     public void Clear()
@@ -56,6 +68,12 @@ public class PlayManager : MonoBehaviour
 
             //최종점수 공식 : 클리어점수 + 남은시간 보너스 + 남은 HP 보너스.
             float score = 12345f + Limit_Time * 123f + PC.hp * 123f;
+            if (score > PlayerPrefs.GetInt("HighScore"))
+            {
+                _bestScoreUI.SetActive(true);
+                PlayerPrefs.SetInt("HighScore", (int)score);
+                PlayerPrefs.SetString("HighScorePlayerName", PlayerPrefs.GetString("CurrentPlayerName"));
+            }
             FinalScoreLabel.text = string.Format("{0:N0}", score);
 
             //최종결과화면 GUI 활성화 시키기.
@@ -73,6 +91,12 @@ public class PlayManager : MonoBehaviour
             PlayEnd = true;
             FinalMessage.text = "Fail...";
             float score = 1234f + Enemy_Count * 123f;
+            if (score > PlayerPrefs.GetInt("HighScore"))
+            {
+                _bestScoreUI.SetActive(true);
+                PlayerPrefs.SetInt("HighScore", (int)score);
+                PlayerPrefs.SetString("HighScorePlayerName", PlayerPrefs.GetString("CurrentPlayerName"));
+            }
             FinalScoreLabel.text = string.Format("{0:N0}", score);
             FinalGUI.SetActive(true);
         }
@@ -85,13 +109,18 @@ public class PlayManager : MonoBehaviour
     public void Replay()
     {
         Time.timeScale = 1f;
-        Application.LoadLevel("MainPlay");
+        SceneManager.LoadScene("MainBG");
     }
 
     public void Quit()
     {
+        Application.Quit();
+    }
+    
+    public void Home()
+    {
         Time.timeScale = 1f;
-        Application.LoadLevel("Title");
+        SceneManager.LoadScene("Title");
     }
 
     public void EnemyDie()
@@ -102,6 +131,12 @@ public class PlayManager : MonoBehaviour
         {
             Clear();
         }
+    }
+
+    public void EscClose()
+    {
+        _escPanel.SetActive(false);
+        Time.timeScale = 1f;
     }
     
 }
